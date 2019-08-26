@@ -10,7 +10,7 @@ pipeline {
                 script{
                 checkout([$class: 'GitSCM', branches: [[name: '*/Dev']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'b6218c54-9fe9-4052-8da9-58322b94e248', url: 'https://github.com/JohnMops/CI-CD-Project']]])
                 sh "git fetch --all"
-                CurrentVersion = sh script: "git branch -r | cut -d'/' -f2 | grep -v -e master -e HEAD -e dev | sort -r | head -1", returnStdout: true
+                CurrentVersion = sh script: "git branch -r | cut -d'/' -f2 | grep -v -e master -e HEAD -e Dev | sort -r | head -1", returnStdout: true
                 CurrentVersion = CurrentVersion.trim()
                 nextVersion = CurrentVersion + 1
                 commitIDshort = sh script:"git rev-parse HEAD | cut -c1-10", returnStdout: true
@@ -23,7 +23,7 @@ pipeline {
             steps {
                 script{
                     dir ('app') {
-                    myImage = docker.build("python-app:${BuildVersion}", ".")
+                    myImage = docker.build("johnmops/python-app:${nextVersion}", ".")
                     myImage.withRun('-p 80:80 --name python') {c ->
                       try{
                           sh 'sleep 1'
@@ -33,6 +33,15 @@ pipeline {
                           
                       }
                     }
+                }
+                }
+            }
+        }
+        stage ('Push to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry('', 'b76ccfeb-b32d-41c0-b116-c85c72168576'){
+                        myImage.push()
                 }
                 }
             }
