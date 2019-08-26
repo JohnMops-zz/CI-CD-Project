@@ -19,7 +19,7 @@ pipeline {
                 }
             }
         }
-        stage ('Build Dockerfile'){
+        stage ('Build Image and Sanity Test'){
             steps {
                 script{
                     dir ('app') {
