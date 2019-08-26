@@ -1,0 +1,39 @@
+@NonCPS
+def jsonParse(def json) {
+    new groovy.json.JsonSlurperClassic().parseText(json)
+}
+pipeline {
+    options {
+        timeout(time: 10, unit: 'MINUTES')
+    }
+    agent {
+        label 'master'
+    }
+    stages {
+        stage('Checkout'){
+            steps{
+                script{
+                    dir('release'){
+                        checkout([$class: 'GitSCM', branches: [[name: '*/development']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'DevOpsINT', url: 'https://github.com/DevOpsINT/release.git']]])
+                    }
+                    dir('infrastructure'){
+                        checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'DevOpsINT', url: 'https://github.com/DevOpsINT/infrastructure.git']]])
+                    }
+                }
+            }
+        }
+        stage('Parse release.json'){
+            steps{
+                dir('release') {
+                    script{
+                        releaseFile = jsonParse(readFile("dev.json"))
+                        experimentVersion = releaseFile["release"]["services"]["experiment"]["version"]
+                        print(experimentVersion)
+                    }
+                }
+            }
+        }
+        
+    }
+    
+}
