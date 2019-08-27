@@ -16,11 +16,7 @@ pipeline {
                 sh "git fetch --all"
                 CurrentVersion = sh script: "git branch -r | cut -d'/' -f2 | grep -v -e master -e HEAD -e Dev | sort -r | head -1", returnStdout: true
                 CurrentVersion = CurrentVersion.trim()
-                sh label: '', script: '''a = ${CurrentVersion:0:1}
-                b = ${CurrentVersion:2:3}
-                c = ${CurrentVersion:4:5}
-                ver = ${CurrentVersion:0:1}.${CurrentVersion:2:3}.${CurrentVersion:4:5}
-                echo ${ver}'''
+               
                 nextVersion = CurrentVersion + 1
                 commitIDshort = sh script:"git rev-parse HEAD | cut -c1-10", returnStdout: true
                 commitIDshort = commitIDshort.trim()
