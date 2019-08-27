@@ -52,11 +52,14 @@ pipeline {
             steps {
                 script {
                     dir ('development'){
-                        withCredentials([usernamePassword(credentialsId: 'b6218c54-9fe9-4052-8da9-58322b94e248', 
-                        passwordVariable: 'GIT_PASS', usernameVariable: 'GIT_USER')]) {
                         sh "git init"
                         sh "git config --global user.name 'johnmops'
                         sh "git config --global user.email 'evgenibir@outlook.com'
+                        withCredentials([usernamePassword(credentialsId: 'b6218c54-9fe9-4052-8da9-58322b94e248', 
+                        passwordVariable: 'GIT_PASS', usernameVariable: 'GIT_USER')]) {
+                        //sh "git init"
+                        //sh "git config --global user.name 'johnmops'
+                        //sh "git config --global user.email 'evgenibir@outlook.com'
                         sh "git branch ${nextVersion}"
                         sh "git checkout ${nextVersion}"
                         sh 'git push https://${GIT_USER}:${GIT_PASS}@github.com/JohnMops/CI-CD-Project'
