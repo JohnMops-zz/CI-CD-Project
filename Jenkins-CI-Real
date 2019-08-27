@@ -56,7 +56,7 @@ pipeline {
                         passwordVariable: 'GIT_PASS', usernameVariable: 'GIT_USER')]) {
                         sh "git branch ${nextVersion}"
                         sh "git checkout ${nextVersion}"
-                        sh 'git push https://${GIT_USER}:\\${GIT_PASS}@github.com/JohnMops/CI-CD-Project'
+                        sh 'git push https://${GIT_USER}:${GIT_PASS}@github.com/JohnMops/CI-CD-Project'
                     }
                     }
                 }
