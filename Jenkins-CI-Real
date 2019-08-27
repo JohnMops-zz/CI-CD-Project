@@ -16,7 +16,7 @@ pipeline {
                 sh "git fetch --all"
                 CurrentVersion = sh script: "git branch -r | cut -d'/' -f2 | grep -v -e master -e HEAD -e Dev | sort -r | head -1", returnStdout: true
                 CurrentVersion = CurrentVersion.trim()
-                tag = sh label: '', script: 'git describe --tags --abbrev=0 | awk -F. \'{$$NF+=1; OFS="."; print $0}\''
+                tag = sh label: '', script: 'git branch --abbrev=0 | awk -F. \'{$$NF+=1; OFS="."; print $3}\''
                 print (tag)
                 nextVersion = CurrentVersion + 1
                 commitIDshort = sh script:"git rev-parse HEAD | cut -c1-10", returnStdout: true
