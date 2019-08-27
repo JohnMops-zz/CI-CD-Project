@@ -54,12 +54,9 @@ pipeline {
                     dir ('development'){
                         withCredentials([usernamePassword(credentialsId: 'b6218c54-9fe9-4052-8da9-58322b94e248', 
                         passwordVariable: 'GIT_PASS', usernameVariable: 'GIT_USER')]) {
-                        script {
-                        env.encodedPass=URLEncoder.encode(GIT_PASS, "UTF-8")
-                    }
                         sh "git branch ${nextVersion}"
                         sh "git checkout ${nextVersion}"
-                        sh 'git push https://${GIT_USER}:${encodedPass}@github.com/JohnMops/CI-CD-Project'
+                        sh 'git push https://${GIT_USER}:\\${GIT_PASS}@github.com/JohnMops/CI-CD-Project'
                     }
                     }
                 }
