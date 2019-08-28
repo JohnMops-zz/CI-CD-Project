@@ -25,7 +25,7 @@ pipeline {
                 commitIDshort = commitIDshort.trim()
                 BuildVersion = "${CurrentVersion}_${commitIDshort}"
                 }
-                }
+              }    
             }
         }
         stage ('Build Image and Sanity Test'){
@@ -43,7 +43,7 @@ pipeline {
                       }
                     }
                 }
-                }
+               }
             }
         }
         stage ('Push to Docker Hub') {
@@ -52,7 +52,7 @@ pipeline {
                     docker.withRegistry('', 'b76ccfeb-b32d-41c0-b116-c85c72168576'){
                         myImage.push()
                 }
-                }
+               }
             }
         }
         stage ('Push to a new branch'){
@@ -65,7 +65,7 @@ pipeline {
                         sh "git checkout ${nextVersion}"
                         sh 'git push https://${GIT_USER}:${GIT_PASS}@github.com/JohnMops/CI-CD-Project'
                     }
-                    }
+                   }
                     
                 }
             }
@@ -82,13 +82,13 @@ pipeline {
                         sh "git commit -m 'CI approved ${nextVersion}'"
                         sh "git push https://${GIT_USER}:${GIT_PASS}@github.com/JohnMops/Release"
                         sh 'docker image prune -a -f --filter "until=1h"'
+         }
         }
-        }
-        }
+       }
         failure {
             emailext body: '${BUILD_ID} failed', subject: 'Build Failed', to: 'your email'
         }
-        }
+       }
     }
     
     
