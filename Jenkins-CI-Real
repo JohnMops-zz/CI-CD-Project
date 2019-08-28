@@ -32,7 +32,7 @@ pipeline {
             steps {
                 script{
                     dir ('development') {
-                    myImage = docker.build("johnmops/python-app:${nextVersion}", "./app")
+                    myImage = docker.build("johnmops/python-app:${nextVersion}_${commitIDshort}", "./app")
                     myImage.withRun('-p 80:80 --name python') {c ->
                       try{
                           sh 'sleep 1'
@@ -81,11 +81,12 @@ pipeline {
                         sh "git add dev.json"
                         sh "git commit -m 'CI approved ${nextVersion}'"
                         sh "git push https://${GIT_USER}:${GIT_PASS}@github.com/JohnMops/Release"
+                        sh 'docker image prune -a -f --filter "until=1h"'
         }
         }
         }
         failure {
-            emailext body: '${BUILD_ID} failed', subject: 'Build Failed', to: '<email>'
+            emailext body: '${BUILD_ID} failed', subject: 'Build Failed', to: 'your email'
         }
         }
     }
