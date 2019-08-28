@@ -7,8 +7,9 @@ pipeline {
         stage ('checkout'){
             steps {
                 script{
-                dir('release'){
-                checkout([$class: 'GitSCM', branches: [[name: '*/Dev']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'b6218c54-9fe9-4052-8da9-58322b94e248', url: 'https://github.com/JohnMops/release']]])
+                dir('Release'){
+                deleteDir()
+                checkout([$class: 'GitSCM', branches: [[name: '*/Dev']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'b6218c54-9fe9-4052-8da9-58322b94e248', url: 'https://github.com/JohnMops/Release/']]])
                 }
                 dir('development'){
                 deleteDir()
@@ -65,8 +66,20 @@ pipeline {
                         sh 'git push https://${GIT_USER}:${GIT_PASS}@github.com/JohnMops/CI-CD-Project'
                     }
                     }
+                    dir('Release') {
+                        withCredentials([usernamePassword(credentialsId: 'b6218c54-9fe9-4052-8da9-58322b94e248', 
+                        passwordVariable: 'GIT_PASS', usernameVariable: 'GIT_USER')]) {
+                        sh "git checkout Dev"
+                        sh "sed -i 's/${CurrentVersion}/${nextVersion}/g' dev.json"
+                        sh "git add dev.json"
+                        sh "git commit -m 'CI approved ${nextVersion}'"
+                        sh "git push https://${GIT_USER}:${GIT_PASS}@github.com/JohnMops/Release"
+        }
+        }
                 }
             }
         }
     }
+    
 }
+            
