@@ -88,7 +88,7 @@ pipeline {
                         sh "git config user.name DevOpsINT"
                         sh "git add dev.json"
                         sh "git commit -m 'CI approved ${nextVersion}'"
-                        sh "git push https://DevOpsINT:\\!Devopsshoam2019@github.com/DevOpsINT/release.git"
+                       // sh "git push https://DevOpsINT:\\!Devopsshoam2019@github.com/DevOpsINT/release.git"
                     }
                 }
             }
