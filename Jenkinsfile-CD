@@ -13,23 +13,39 @@ pipeline {
         stage('Checkout'){
             steps{
                 script{
-                    dir('release'){
-                        checkout([$class: 'GitSCM', branches: [[name: '*/development']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'DevOpsINT', url: 'https://github.com/DevOpsINT/release.git']]])
+                    dir('Release'){
+                        deleteDir ()
+                        checkout([$class: 'GitSCM', branches: [[name: '*/Dev']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'b6218c54-9fe9-4052-8da9-58322b94e248', url: 'https://github.com/JohnMops/Release']]])
                     }
-                    dir('infrastructure'){
-                        checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'DevOpsINT', url: 'https://github.com/DevOpsINT/infrastructure.git']]])
+                    dir('infra'){
+                        deleteDir()
+                        checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'b6218c54-9fe9-4052-8da9-58322b94e248', url: 'https://github.com/JohnMops/infra']]])
                     }
                 }
             }
         }
         stage('Parse release.json'){
             steps{
-                dir('release') {
+                dir('Release') {
                     script{
                         releaseFile = jsonParse(readFile("dev.json"))
                         experimentVersion = releaseFile["release"]["services"]["experiment"]["version"]
-                        print(experimentVersion)
+                        hostIP = releaseFile["release"]["services"]["experiment"]["instance"]
+                        print (experimentVersion)
+                        print (hostIP)
                     }
+                }
+            }
+        }
+        stage ('Run Ansible on a target host to deploy APP') {
+            steps {
+                dir ('infra/Ansible'){
+                script {
+                     sh "sed -i 's/host/${hostIP}/g' hosts"
+                     sh "sed -i 's/host/${hostIP}/g' group_vars/all"
+                     sh "sed -i 's/experimentVersion/${experimentVersion}/g' group_vars/all"
+                     sh 'ansible-playbook -i hosts -u ubuntu -b  --private-key=/var/jenkins_home/ansible/myKey.pem play.yml'
+                }
                 }
             }
         }
