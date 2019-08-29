@@ -7,6 +7,12 @@ pipeline {
         stage ('checkout'){
             steps {
                 script{
+                    target= input(
+                            id: 'userInput', message: 'Enter target IP',
+                            parameters: [
+                                string(defaultValue: '0.0.0.0',
+                                       description: 'ip address',
+                                       name: 'IP')])
                 dir('Release'){
                 deleteDir()
                 checkout([$class: 'GitSCM', branches: [[name: '*/Dev']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'b6218c54-9fe9-4052-8da9-58322b94e248', url: 'https://github.com/JohnMops/Release/']]])
@@ -20,9 +26,9 @@ pipeline {
                 int a = sh script : "echo $CurrentVersion | cut -c1", returnStdout: true
                 int b = sh script : "echo \"$CurrentVersion\" | cut -c3", returnStdout: true
                 int c = sh script : "echo \"$CurrentVersion\" | cut -c5", returnStdout: true
-                nextVersion = "${a}.${b}.${c+1}"
                 commitIDshort = sh script:"git rev-parse HEAD | cut -c1-10", returnStdout: true
                 commitIDshort = commitIDshort.trim()
+                nextVersion = "${a}.${b}.${c+1}"
                 BuildVersion = "${CurrentVersion}_${commitIDshort}"
                 }
                 }
@@ -32,7 +38,7 @@ pipeline {
             steps {
                 script{
                     dir ('development') {
-                    myImage = docker.build("johnmops/python-app:${nextVersion}_${commitIDshort}", "./app")
+                    myImage = docker.build("johnmops/python-app:${nextVersion}", "./app")
                     myImage.withRun('-p 80:80 --name python') {c ->
                       try{
                           sh 'sleep 1'
@@ -78,6 +84,7 @@ pipeline {
                         passwordVariable: 'GIT_PASS', usernameVariable: 'GIT_USER')]) {
                         sh "git checkout Dev"
                         sh "sed -i 's/${CurrentVersion}/${nextVersion}/g' dev.json"
+                        sh "sed -i 's/ipaddr/${target}/g' dev.json"
                         sh "git add dev.json"
                         sh "git commit -m 'CI approved ${nextVersion}'"
                         sh "git push https://${GIT_USER}:${GIT_PASS}@github.com/JohnMops/Release"
@@ -86,7 +93,7 @@ pipeline {
         }
         }
         failure {
-            emailext body: '${BUILD_ID} failed', subject: 'Build Failed', to: 'evgenibir@outlook.com'
+            emailext body: '${BUILD_ID} failed', subject: 'Build Failed', to: 'your email'
         }
         }
     }
