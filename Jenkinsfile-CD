@@ -1,4 +1,4 @@
-@NonCPS //nope
+@NonCPS //nop
 def jsonParse(def json) {
     new groovy.json.JsonSlurperClassic().parseText(json)
 }
